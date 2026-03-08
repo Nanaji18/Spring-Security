@@ -38,7 +38,7 @@ public class JwtService {
     
     public Claims verifySigAndExtractClaims(String token) {
         try {
-            return Jwts.parser()  //parserBuilder()
+            return Jwts.parser()  //parserBuilder() use this one
                     .setSigningKey(getSigningKey())  // make sure this returns a Key with >= 256 bits
                     .build()
                     .parseClaimsJws(token)
