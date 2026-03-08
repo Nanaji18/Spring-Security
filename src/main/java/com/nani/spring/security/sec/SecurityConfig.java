@@ -11,46 +11,48 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.DefaultSecurityFilterChain;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.nani.spring.security.usersservice.UsersService;
-
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 	
-	
+	 private final JwtFilter jwtFilter;
+
+	    public SecurityConfig(JwtFilter jwtFilter) {
+	        this.jwtFilter = jwtFilter;
+	    }
+
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-	    http
-	        .csrf(csrf -> csrf.disable())
+	    http.csrf(csrf -> csrf.disable())
 	        .authorizeHttpRequests(auth -> auth
-	                .requestMatchers("/nani/hi").permitAll()
-	                .requestMatchers("/user/save").permitAll()
-	                .anyRequest().authenticated()
+	            .requestMatchers("/nani/hi", "/user/save", "/user/authenticate").permitAll()
+	            .anyRequest().authenticated()
 	        )
-	        .httpBasic(Customizer.withDefaults());
+	        .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
 	    return http.build();
 	}
-	
+
 	@Bean
 	public UserDetailsService detailsService() {
 		return new UsersService();
 	}
-	
+
 	@Bean
-	public AuthenticationManager authenticationManager(UserDetailsService detailsService,PasswordEncoder encoder) {
-		
-		DaoAuthenticationProvider authenticationProvider=new DaoAuthenticationProvider(detailsService);
+	public AuthenticationManager authenticationManager(UserDetailsService detailsService, PasswordEncoder encoder) {
+
+		DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(detailsService);
 		authenticationProvider.setPasswordEncoder(encoder);
 		return new ProviderManager(authenticationProvider);
-		
+
 	}
-	
+
 	@Bean
 	public PasswordEncoder encoder() {
 		return new BCryptPasswordEncoder();
