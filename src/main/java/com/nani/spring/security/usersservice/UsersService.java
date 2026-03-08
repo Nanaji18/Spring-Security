@@ -1,8 +1,7 @@
 package com.nani.spring.security.usersservice;
 
-import java.util.Collections;
-
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -26,7 +25,7 @@ public class UsersService implements UserDetailsService{
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 	Users userNameAndInactive = getUserNameAndInactive(username,true);
 	
-	return User.builder().username(userNameAndInactive.getUsername()).password(userNameAndInactive.getPassword()).authorities(Collections.emptyList()).build();
+	return User.builder().username(userNameAndInactive.getUsername()).password(userNameAndInactive.getPassword()).authorities(new SimpleGrantedAuthority(userNameAndInactive.getRole())).build();
 	}
 
 }

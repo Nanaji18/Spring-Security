@@ -39,12 +39,13 @@ public class UsersController {
 	private JwtService jwtService;
 	
 	@GetMapping("/save")
-	public Users saveUser(@RequestParam String username, @RequestParam String password) {
+	public Users saveUser(@RequestParam String username, @RequestParam String password, @RequestParam String role) {
 		
 		Users user=new Users();
 		user.setUsername(username);
 		user.setPassword(encoder.encode(password));
 		user.setActive(true);
+		user.setRole(role);
 		return repo.save(user);
 	}
 	
@@ -54,7 +55,8 @@ public class UsersController {
 		Authentication authenticate = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
 		
 		if (authenticate.isAuthenticated()) {
-			return jwtService.generateToken(authRequest.getUsername());
+			String role = authenticate.getAuthorities().iterator().next().getAuthority().replace("ROLE_", "");
+			return jwtService.generateToken(authRequest.getUsername(), role);
 		}
 		return null;
 		

@@ -6,6 +6,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.crypto.SecretKey;
+
 import org.springframework.stereotype.Service;
 
 import io.jsonwebtoken.Claims;
@@ -18,9 +20,10 @@ public class JwtService {
 
 	private static final String SECRET_KEY = "this_is_a_very_long_secret_key_for_hs256_1234";
 	
-    public String generateToken(String username) {
+    public String generateToken(String username , String role) {
 
         Map<String, Object> claims = new HashMap<>();
+        claims.put("Role", role);
 
         return Jwts.builder()
                 .claims(claims)
@@ -38,13 +41,12 @@ public class JwtService {
     
     public Claims verifySigAndExtractClaims(String token) {
         try {
-            return Jwts.parser()  //parserBuilder()
-                    .setSigningKey(getSigningKey())  // make sure this returns a Key with >= 256 bits
+        	return Jwts.parser()
+                    .verifyWith((SecretKey) getSigningKey())   // use verifyWith instead of setSigningKey
                     .build()
-                    .parseClaimsJws(token)
-                    .getBody();
+                    .parseSignedClaims(token)      // new method
+                    .getPayload(); 
         } catch (JwtException e) {
-            // handle invalid token
             throw new RuntimeException("Invalid JWT token", e);
         }
     }
